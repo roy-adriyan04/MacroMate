@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, Platform, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, Platform, StatusBar, Dimensions } from 'react-native';
 import { Colors } from '../../constants/Colors';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -22,7 +22,7 @@ export default function Home() {
         if (profile?.aiPlan) {
           setAiPlan(profile.aiPlan);
         } else {
-          const cached = await AsyncStorage.getItem('onboarding_ai_plan');
+          const cached = await AsyncStorage.getItem(`onboarding_ai_plan_${user.id}`);
           if (cached) setAiPlan(JSON.parse(cached));
         }
       } catch (err) {
@@ -41,6 +41,9 @@ export default function Home() {
 
   const waterTarget = aiPlan?.waterCups || 10;
   const currentWater = Math.floor(waterTarget * 0.5);
+
+  const { width } = Dimensions.get('window');
+  const cardWidth = width - 48; // Full width minus 24px padding on both sides
 
   return (
     <SafeAreaView style={styles.container}>
@@ -130,19 +133,28 @@ export default function Home() {
                 <View style={styles.macroTrack}>
                   <View style={[styles.macroFill, { backgroundColor: Colors.tertiary, width: '60%' }]} />
                 </View>
-                <Text style={[styles.macroLabel, { color: Colors.tertiary }]}>{aiPlan?.protein || 150}g PRO</Text>
+                <View style={styles.macroLabelRow}>
+                  <MaterialIcons name="egg-alt" size={14} color={Colors.tertiary} />
+                  <Text style={[styles.macroLabel, { color: Colors.tertiary }]}>{aiPlan?.protein || 150}g Protein</Text>
+                </View>
               </View>
               <View style={styles.macroCol}>
                 <View style={styles.macroTrack}>
                   <View style={[styles.macroFill, { backgroundColor: Colors.primaryContainer, width: '60%' }]} />
                 </View>
-                <Text style={[styles.macroLabel, { color: Colors.primary }]}>{aiPlan?.carbs || 200}g CARB</Text>
+                <View style={styles.macroLabelRow}>
+                  <MaterialIcons name="breakfast-dining" size={14} color={Colors.primary} />
+                  <Text style={[styles.macroLabel, { color: Colors.primary }]}>{aiPlan?.carbs || 200}g Carbs</Text>
+                </View>
               </View>
               <View style={styles.macroCol}>
                 <View style={styles.macroTrack}>
                   <View style={[styles.macroFill, { backgroundColor: Colors.secondary, width: '60%' }]} />
                 </View>
-                <Text style={[styles.macroLabel, { color: Colors.secondary }]}>{aiPlan?.fat || 60}g FAT</Text>
+                <View style={styles.macroLabelRow}>
+                  <MaterialIcons name="water-drop" size={14} color={Colors.secondary} />
+                  <Text style={[styles.macroLabel, { color: Colors.secondary }]}>{aiPlan?.fat || 60}g Fats</Text>
+                </View>
               </View>
             </View>
 
@@ -165,36 +177,67 @@ export default function Home() {
           </TouchableOpacity>
         </View>
 
-        {/* Weight & Water Grid */}
-        <View style={styles.gridRow}>
-          
-          {/* Weight Card */}
-          <View style={[styles.clayCard, styles.gridCard]}>
-            <View style={styles.gridHeaderRow}>
-              <View>
-                <Text style={styles.gridLabel}>CURRENT WEIGHT</Text>
-                <Text style={styles.gridValue}>185.4 <Text style={styles.gridUnit}>lbs</Text></Text>
-              </View>
-              <View style={styles.gridBadge}>
-                <MaterialIcons name="trending-down" size={14} color={Colors.tertiary} />
-                <Text style={styles.gridBadgeText}>-1.2 lbs</Text>
-              </View>
-            </View>
+        {/* Weight & Steps Scrollable Row */}
+        <View style={styles.scrollRowWrapper}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollRow} snapToInterval={cardWidth + 16} decelerationRate="fast">
             
-            <View style={styles.sparklineContainer}>
-              <Svg style={{ width: '100%', height: 64, overflow: 'visible' }} viewBox="0 0 100 40" preserveAspectRatio="none">
-                <Path d="M 0,10 Q 15,12 25,18 T 50,25 T 75,32 T 100,38" fill="none" stroke="#64a1ff" strokeWidth="3" strokeLinecap="round" />
-                <Circle cx="0" cy="10" r="3" fill="#64a1ff" />
-                <Circle cx="100" cy="38" r="4" fill="#005ab2" />
-              </Svg>
+            {/* Weight Card */}
+            <View style={[styles.clayCard, styles.gridCard, { width: cardWidth }]}>
+              <View style={styles.gridHeaderRow}>
+                <View>
+                  <Text style={styles.gridLabel}>CURRENT WEIGHT</Text>
+                  <Text style={styles.gridValue}>185.4 <Text style={styles.gridUnit}>lbs</Text></Text>
+                </View>
+                <View style={styles.gridBadge}>
+                  <MaterialIcons name="trending-down" size={14} color={Colors.tertiary} />
+                  <Text style={styles.gridBadgeText}>-1.2 lbs</Text>
+                </View>
+              </View>
+              
+              <View style={styles.sparklineContainer}>
+                <Svg style={{ width: '100%', height: 64, overflow: 'visible' }} viewBox="0 0 100 40" preserveAspectRatio="none">
+                  <Path d="M 0,10 Q 15,12 25,18 T 50,25 T 75,32 T 100,38" fill="none" stroke="#64a1ff" strokeWidth="3" strokeLinecap="round" />
+                  <Circle cx="0" cy="10" r="3" fill="#64a1ff" />
+                  <Circle cx="100" cy="38" r="4" fill="#005ab2" />
+                </Svg>
+              </View>
+
+              <TouchableOpacity style={styles.logButton}>
+                <Text style={styles.logButtonText}>LOG WEIGHT</Text>
+              </TouchableOpacity>
             </View>
 
-            <TouchableOpacity style={styles.logButton}>
-              <Text style={styles.logButtonText}>LOG WEIGHT</Text>
-            </TouchableOpacity>
-          </View>
+            {/* Steps Card */}
+            <View style={[styles.clayCard, styles.gridCard, { width: cardWidth }]}>
+              <View style={styles.gridHeaderRow}>
+                <View>
+                  <Text style={styles.gridLabel}>DAILY STEPS</Text>
+                  <Text style={styles.gridValue}>8,420 <Text style={styles.gridUnit}>steps</Text></Text>
+                </View>
+                <View style={[styles.gridBadge, { backgroundColor: 'rgba(0, 90, 178, 0.1)' }]}>
+                  <MaterialIcons name="directions-walk" size={14} color={Colors.primary} />
+                  <Text style={[styles.gridBadgeText, { color: Colors.primary }]}>+1,200</Text>
+                </View>
+              </View>
+              
+              <View style={styles.sparklineContainer}>
+                <Svg style={{ width: '100%', height: 64, overflow: 'visible' }} viewBox="0 0 100 40" preserveAspectRatio="none">
+                  <Path d="M 0,38 Q 20,38 40,25 T 80,15 T 100,5" fill="none" stroke={Colors.primary} strokeWidth="3" strokeLinecap="round" />
+                  <Circle cx="0" cy="38" r="3" fill="#64a1ff" />
+                  <Circle cx="100" cy="5" r="4" fill="#005ab2" />
+                </Svg>
+              </View>
 
-          {/* Water Tracker */}
+              <TouchableOpacity style={styles.logButton}>
+                <Text style={styles.logButtonText}>LOG STEPS</Text>
+              </TouchableOpacity>
+            </View>
+
+          </ScrollView>
+        </View>
+
+        {/* Water Tracker (Full Width Row) */}
+        <View style={styles.singleRow}>
           <View style={[styles.clayCard, styles.gridCard, { justifyContent: 'space-between' }]}>
             <View>
               <Text style={styles.gridLabel}>WATER INTAKE</Text>
@@ -202,7 +245,7 @@ export default function Home() {
             </View>
             
             <View style={styles.waterDrops}>
-              {Array.from({ length: Math.min(currentWater, 5) }).map((_, i) => (
+              {Array.from({ length: Math.min(currentWater, 12) }).map((_, i) => (
                 <View key={i} style={styles.waterDropActive}>
                   <MaterialIcons name="water-drop" size={20} color="#fff" />
                 </View>
@@ -212,7 +255,6 @@ export default function Home() {
               </TouchableOpacity>
             </View>
           </View>
-
         </View>
 
         {/* Buddy Feed Preview */}
@@ -528,6 +570,12 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 4,
   },
+  macroLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+  },
   macroLabel: {
     fontSize: 10,
     fontWeight: '900',
@@ -571,7 +619,17 @@ const styles = StyleSheet.create({
     padding: 4,
   },
 
-  // Grid
+  // Grid & Scrollable Tracking Rows
+  scrollRowWrapper: {
+    marginHorizontal: -24, // Pull text to edges for scrolling
+  },
+  scrollRow: {
+    paddingHorizontal: 24,
+    gap: 16,
+  },
+  singleRow: {
+    width: '100%',
+  },
   gridRow: {
     flexDirection: 'row',
     gap: 24,

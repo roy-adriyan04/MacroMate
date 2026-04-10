@@ -39,7 +39,7 @@ export default function AppLayout() {
               'onboarding_activity',
               'onboarding_diet',
               'onboarding_metrics',
-              'onboarding_ai_plan'
+              `onboarding_ai_plan_${user.id}`
             ]);
             setNeedsOnboarding(true);
           } else {
