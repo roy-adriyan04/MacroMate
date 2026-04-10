@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MacroMate - Physical Metrics</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Be+Vietnam+Pro:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#4493ff",
+                        "on-primary-container": "#00224a",
+                        "surface-container-highest": "#d7dee3",
+                        "tertiary-container": "#8efecb",
+                        "surface-tint": "#005ab2",
+                        "on-error-container": "#570008",
+                        "surface-container": "#e3e9ee",
+                        "secondary-dim": "#813c00",
+                        "on-surface": "#2a2f32",
+                        "tertiary-fixed-dim": "#80efbd",
+                        "outline": "#73777b",
+                        "surface-variant": "#d7dee3",
+                        "on-secondary-container": "#753500",
+                        "error-container": "#fb5151",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed": "#004d34",
+                        "on-surface-variant": "#575c60",
+                        "on-secondary": "#fff0e8",
+                        "on-secondary-fixed": "#572600",
+                        "primary-dim": "#004e9c",
+                        "inverse-on-surface": "#999da1",
+                        "on-primary-fixed-variant": "#002b5b",
+                        "surface": "#f3f7fb",
+                        "inverse-primary": "#3c90ff",
+                        "background": "#f3f7fb",
+                        "on-tertiary": "#c8ffe1",
+                        "surface-dim": "#ced5db",
+                        "surface-container-high": "#dde3e8",
+                        "secondary": "#914709",
+                        "on-secondary-fixed-variant": "#833d00",
+                        "secondary-fixed-dim": "#ffb283",
+                        "surface-bright": "#f3f7fb",
+                        "primary": "#005ab2",
+                        "secondary-container": "#ffc5a3",
+                        "primary-container": "#64a1ff",
+                        "on-background": "#2a2f32",
+                        "outline-variant": "#a9aeb1",
+                        "on-primary-fixed": "#000000",
+                        "inverse-surface": "#0a0f12",
+                        "tertiary-fixed": "#8efecb",
+                        "error": "#b31b25",
+                        "tertiary": "#006949",
+                        "on-primary": "#eff2ff",
+                        "on-tertiary-fixed-variant": "#006d4c",
+                        "on-tertiary-container": "#006243",
+                        "primary-fixed": "#64a1ff",
+                        "error-dim": "#9f0519",
+                        "secondary-fixed": "#ffc5a3",
+                        "on-error": "#ffefee",
+                        "surface-container-low": "#ecf1f6",
+                        "tertiary-dim": "#005b3f"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Be Vietnam Pro"],
+                        "label": ["Plus Jakarta Sans"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Be Vietnam Pro', sans-serif; }
+        .font-headline { font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        .clay-card {
+            background: #ffffff;
+            box-shadow: 0 20px 40px rgba(42, 47, 50, 0.06), 
+                        inset 4px 4px 4px rgba(255, 255, 255, 0.8),
+                        inset -4px -4px 4px rgba(206, 213, 219, 0.5);
+        }
+
+        .clay-input {
+            background: #dde3e8;
+            box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.05),
+                        inset -4px -4px 8px rgba(255, 255, 255, 0.7);
+        }
+
+        .clay-button-primary {
+            background: linear-gradient(135deg, #005ab2 0%, #64a1ff 100%);
+            box-shadow: 0 10px 20px rgba(0, 90, 178, 0.2),
+                        inset 4px 4px 4px rgba(255, 255, 255, 0.3),
+                        inset -4px -4px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .clay-toggle-active {
+            background: #ffffff;
+            box-shadow: 0 4px 10px rgba(42, 47, 50, 0.1),
+                        inset 2px 2px 2px rgba(255, 255, 255, 0.8);
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+<!-- Top Navigation Anchor (Manual suppression of BottomNavBar due to Onboarding intent) -->
+<header class="bg-gradient-to-b from-[#f3f7fb] to-[#ecf1f6] sticky top-0 z-50 rounded-b-xl shadow-[0_20px_40px_rgba(42,47,50,0.06),inset_0_4px_4px_rgba(255,255,255,0.8)]">
+<div class="flex justify-between items-center w-full px-6 py-6 max-w-xl mx-auto">
+<button class="text-[#005ab2] hover:opacity-80 hover:scale-95 transition-all duration-300 active:scale-90 flex items-center gap-1">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline font-extrabold tracking-tight text-display-sm text-[#005ab2]">MacroMate</h1>
+<button class="text-[#a9aeb1] font-bold hover:opacity-80 transition-all duration-300">Skip</button>
+</div>
+</header>
+<main class="flex-1 w-full max-w-xl mx-auto px-6 py-8">
+<!-- Progress Section -->
+<div class="mb-12">
+<div class="flex justify-between items-center mb-4">
+<span class="text-on-surface-variant font-bold text-sm">Onboarding Progress</span>
+<span class="text-primary font-black text-sm">80%</span>
+</div>
+<div class="w-full h-4 bg-surface-container-high rounded-full overflow-hidden shadow-inner p-1">
+<div class="h-full w-[80%] bg-gradient-to-r from-primary to-primary-container rounded-full shadow-[0_0_12px_rgba(0,90,178,0.3)]"></div>
+</div>
+</div>
+<!-- Headline -->
+<div class="mb-10 text-center">
+<h2 class="font-headline text-4xl font-extrabold text-on-surface tracking-tight leading-tight mb-3">Tell us about yourself</h2>
+<p class="text-on-surface-variant font-medium">This helps us calculate your daily caloric needs accurately.</p>
+</div>
+<!-- Unit Toggle -->
+<div class="bg-surface-container-low p-2 rounded-full flex gap-2 mb-10 w-fit mx-auto shadow-inner">
+<button class="px-8 py-3 rounded-full clay-toggle-active font-bold text-primary transition-all duration-300">Metric</button>
+<button class="px-8 py-3 rounded-full font-bold text-on-surface-variant hover:text-on-surface transition-all duration-300">Imperial</button>
+</div>
+<!-- Form Section -->
+<div class="space-y-8">
+<!-- Height Input -->
+<div class="relative group">
+<label class="block font-headline font-bold text-on-surface mb-3 ml-2">Height</label>
+<div class="relative flex items-center">
+<input class="clay-input w-full px-6 py-5 rounded-lg border-none focus:ring-2 focus:ring-primary-container transition-all outline-none font-bold text-xl text-primary-dim placeholder:text-outline-variant" placeholder="175" type="number"/>
+<span class="absolute right-6 font-black text-on-surface-variant">cm</span>
+</div>
+</div>
+<!-- Weight Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Current Weight -->
+<div>
+<label class="block font-headline font-bold text-on-surface mb-3 ml-2">Current Weight</label>
+<div class="relative flex items-center">
+<input class="clay-input w-full px-6 py-5 rounded-lg border-none focus:ring-2 focus:ring-primary-container transition-all outline-none font-bold text-xl text-primary-dim placeholder:text-outline-variant" placeholder="82.5" type="number"/>
+<span class="absolute right-6 font-black text-on-surface-variant">kg</span>
+</div>
+</div>
+<!-- Target Weight -->
+<div>
+<label class="block font-headline font-bold text-on-surface mb-3 ml-2">Target Weight</label>
+<div class="relative flex items-center">
+<input class="clay-input w-full px-6 py-5 rounded-lg border-none focus:ring-2 focus:ring-primary-container transition-all outline-none font-bold text-xl text-tertiary-dim placeholder:text-outline-variant" placeholder="75.0" type="number"/>
+<span class="absolute right-6 font-black text-on-surface-variant">kg</span>
+</div>
+</div>
+</div>
+<!-- Asymmetric Aesthetic Visual -->
+<div class="clay-card rounded-xl p-6 mt-12 flex items-center gap-6 overflow-hidden relative">
+<div class="flex-1">
+<h4 class="font-headline font-extrabold text-on-surface leading-tight mb-1">Volumetric Goal</h4>
+<p class="text-sm text-on-surface-variant">We'll adjust your macros to hit your <span class="text-tertiary font-bold">7.5kg</span> loss target safely.</p>
+</div>
+<div class="w-16 h-16 rounded-lg bg-tertiary-container flex items-center justify-center rotate-3 shadow-lg">
+<span class="material-symbols-outlined text-tertiary text-3xl" style="font-variation-settings: 'FILL' 1;">trending_down</span>
+</div>
+<!-- Decorative element -->
+<div class="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl"></div>
+</div>
+</div>
+</main>
+<!-- Fixed Bottom Action Area -->
+<footer class="p-6 max-w-xl mx-auto w-full">
+<button class="clay-button-primary w-full py-5 rounded-full text-white font-headline font-black text-xl tracking-wide flex items-center justify-center gap-3 active:scale-95 transition-all duration-300">
+            Next Step
+            <span class="material-symbols-outlined font-bold">arrow_forward</span>
+</button>
+<div class="mt-8 flex justify-center">
+<div class="flex gap-2">
+<div class="w-2 h-2 rounded-full bg-surface-container-highest"></div>
+<div class="w-2 h-2 rounded-full bg-surface-container-highest"></div>
+<div class="w-2 h-2 rounded-full bg-surface-container-highest"></div>
+<div class="w-6 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(0,90,178,0.4)]"></div>
+<div class="w-2 h-2 rounded-full bg-surface-container-highest"></div>
+</div>
+</div>
+</footer>
+</body></html>

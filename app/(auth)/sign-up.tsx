@@ -45,9 +45,15 @@ export default function SignUpScreen() {
     
     setLoading(true);
     try {
+      const nameParts = fullName.trim().split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
       await signUp.create({
         emailAddress,
         password,
+        firstName,
+        lastName,
       });
 
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
@@ -69,7 +75,7 @@ export default function SignUpScreen() {
 
       if (completeSignUp.status === "complete") {
         await setActive({ session: completeSignUp.createdSessionId });
-        router.replace("/(app)/home");
+        router.replace("/(app)");
       }
     } catch (err: any) {
       alert(err.errors[0]?.message || "Verification failed");

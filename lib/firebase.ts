@@ -13,7 +13,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 
-export const saveUserProfile = async (uid: string, data: any) => {
+export const saveUserProfile = async (uid: string, data: any): Promise<boolean> => {
   try {
     const userRef = doc(db, "users", uid);
     const docSnap = await getDoc(userRef);
@@ -37,8 +37,10 @@ export const saveUserProfile = async (uid: string, data: any) => {
       // Update existing if needed (usually just lastLogin or similar)
       await setDoc(userRef, { ...data, updatedAt: serverTimestamp() }, { merge: true });
     }
+    return true;
   } catch (e) {
     console.error("Error saving user profile: ", e);
+    return false;
   }
 };
 

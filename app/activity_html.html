@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Be+Vietnam+Pro:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed-dim": "#4493ff",
+                    "on-primary-container": "#00224a",
+                    "surface-container-highest": "#d7dee3",
+                    "tertiary-container": "#8efecb",
+                    "surface-tint": "#005ab2",
+                    "on-error-container": "#570008",
+                    "surface-container": "#e3e9ee",
+                    "secondary-dim": "#813c00",
+                    "on-surface": "#2a2f32",
+                    "tertiary-fixed-dim": "#80efbd",
+                    "outline": "#73777b",
+                    "surface-variant": "#d7dee3",
+                    "on-secondary-container": "#753500",
+                    "error-container": "#fb5151",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed": "#004d34",
+                    "on-surface-variant": "#575c60",
+                    "on-secondary": "#fff0e8",
+                    "on-secondary-fixed": "#572600",
+                    "primary-dim": "#004e9c",
+                    "inverse-on-surface": "#999da1",
+                    "on-primary-fixed-variant": "#002b5b",
+                    "surface": "#f3f7fb",
+                    "inverse-primary": "#3c90ff",
+                    "background": "#f3f7fb",
+                    "on-tertiary": "#c8ffe1",
+                    "surface-dim": "#ced5db",
+                    "surface-container-high": "#dde3e8",
+                    "secondary": "#914709",
+                    "on-secondary-fixed-variant": "#833d00",
+                    "secondary-fixed-dim": "#ffb283",
+                    "surface-bright": "#f3f7fb",
+                    "primary": "#005ab2",
+                    "secondary-container": "#ffc5a3",
+                    "primary-container": "#64a1ff",
+                    "on-background": "#2a2f32",
+                    "outline-variant": "#a9aeb1",
+                    "on-primary-fixed": "#000000",
+                    "inverse-surface": "#0a0f12",
+                    "tertiary-fixed": "#8efecb",
+                    "error": "#b31b25",
+                    "tertiary": "#006949",
+                    "on-primary": "#eff2ff",
+                    "on-tertiary-fixed-variant": "#006d4c",
+                    "on-tertiary-container": "#006243",
+                    "primary-fixed": "#64a1ff",
+                    "error-dim": "#9f0519",
+                    "secondary-fixed": "#ffc5a3",
+                    "on-error": "#ffefee",
+                    "surface-container-low": "#ecf1f6",
+                    "tertiary-dim": "#005b3f"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Be Vietnam Pro"],
+                    "label": ["Plus Jakarta Sans"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .clay-card {
+            box-shadow: 0 20px 40px rgba(42,47,50,0.06), 
+                        inset 4px 4px 0px rgba(255,255,255,0.8),
+                        inset -4px -4px 8px rgba(206,213,219,0.5);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .clay-card:active {
+            transform: scale(0.96);
+            box-shadow: 0 10px 20px rgba(42,47,50,0.04), 
+                        inset 6px 6px 12px rgba(206,213,219,0.4);
+        }
+        .clay-card-active {
+            background: linear-gradient(135deg, #005ab2 0%, #64a1ff 100%);
+            color: #eff2ff;
+            box-shadow: 0 15px 30px rgba(0, 90, 178, 0.2),
+                        inset 4px 4px 4px rgba(255, 255, 255, 0.3);
+        }
+        .clay-card-active .material-symbols-outlined {
+            color: #ffffff;
+        }
+        .clay-button {
+            box-shadow: 0 12px 24px rgba(0, 90, 178, 0.2),
+                        inset 0 2px 4px rgba(255, 255, 255, 0.3);
+        }
+        .progress-orb {
+            box-shadow: 0 0 15px rgba(0, 105, 73, 0.2);
+        }
+        .custom-radius {
+            border-radius: 3rem 1.5rem 3rem 1.5rem;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface antialiased min-h-screen flex flex-col">
+<!-- TopAppBar from JSON -->
+<header class="sticky top-0 z-50 w-full">
+<div class="bg-gradient-to-b from-[#f3f7fb] to-[#ecf1f6] dark:from-slate-900 dark:to-slate-800 rounded-b-[3rem] shadow-[0_20px_40px_rgba(42,47,50,0.06),inset_0_4px_4px_rgba(255,255,255,0.8)]">
+<div class="flex justify-between items-center w-full px-6 py-4 max-w-xl mx-auto h-20">
+<button class="hover:opacity-80 hover:scale-95 transition-all duration-300 active:scale-90 flex items-center justify-center p-2 rounded-full">
+<span class="material-symbols-outlined text-[#005ab2]" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-['Plus_Jakarta_Sans'] font-extrabold tracking-tight text-xl text-[#005ab2]">MacroMate</h1>
+<button class="hover:opacity-80 hover:scale-95 transition-all duration-300 active:scale-90 font-['Plus_Jakarta_Sans'] font-bold text-[#005ab2]">
+                    Skip
+                </button>
+</div>
+</div>
+</header>
+<main class="flex-grow w-full max-w-xl mx-auto px-6 pt-8 pb-32">
+<!-- Progress Bar Section -->
+<div class="mb-10">
+<div class="flex justify-between items-end mb-3 px-2">
+<span class="font-headline font-bold text-primary text-sm">Onboarding</span>
+<span class="font-headline font-extrabold text-primary text-lg">40%</span>
+</div>
+<div class="h-4 w-full bg-surface-container-high rounded-full overflow-hidden p-1 shadow-inner">
+<div class="h-full bg-gradient-to-r from-tertiary-dim to-tertiary rounded-full progress-orb" style="width: 40%"></div>
+</div>
+</div>
+<!-- Headline -->
+<div class="mb-10 text-center md:text-left">
+<h2 class="font-headline font-extrabold text-4xl tracking-tight text-on-surface mb-2">How active are you?</h2>
+<p class="text-on-surface-variant font-medium">This helps us calculate your daily calorie requirements accurately.</p>
+</div>
+<!-- Activity Selection Grid -->
+<div class="space-y-4">
+<!-- Sedentary -->
+<div class="clay-card bg-surface-container-lowest custom-radius p-5 flex items-center gap-5 cursor-pointer hover:bg-surface-container transition-colors group">
+<div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-4xl text-primary" data-icon="chair">chair</span>
+</div>
+<div class="flex-grow">
+<h3 class="font-headline font-bold text-lg text-on-surface">Sedentary</h3>
+<p class="text-sm text-on-surface-variant leading-tight">Office job, little to no exercise</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant opacity-30" data-icon="check_circle">check_circle</span>
+</div>
+<!-- Lightly Active -->
+<div class="clay-card bg-surface-container-lowest custom-radius p-5 flex items-center gap-5 cursor-pointer hover:bg-surface-container transition-colors group">
+<div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-4xl text-primary" data-icon="directions_walk">directions_walk</span>
+</div>
+<div class="flex-grow">
+<h3 class="font-headline font-bold text-lg text-on-surface">Lightly Active</h3>
+<p class="text-sm text-on-surface-variant leading-tight">Light exercise 1-3 days/week</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant opacity-30" data-icon="check_circle">check_circle</span>
+</div>
+<!-- Moderately Active (Active State Example) -->
+<div class="clay-card-active custom-radius p-5 flex items-center gap-5 cursor-pointer group">
+<div class="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-4xl text-white" data-icon="fitness_center" style="font-variation-settings: 'FILL' 1;">fitness_center</span>
+</div>
+<div class="flex-grow">
+<h3 class="font-headline font-bold text-lg text-white">Moderately Active</h3>
+<p class="text-sm text-white/90 leading-tight">Moderate exercise 3-5 days/week</p>
+</div>
+<span class="material-symbols-outlined text-white" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<!-- Very Active -->
+<div class="clay-card bg-surface-container-lowest custom-radius p-5 flex items-center gap-5 cursor-pointer hover:bg-surface-container transition-colors group">
+<div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-4xl text-primary" data-icon="run_circle">run_circle</span>
+</div>
+<div class="flex-grow">
+<h3 class="font-headline font-bold text-lg text-on-surface">Very Active</h3>
+<p class="text-sm text-on-surface-variant leading-tight">Hard exercise 6-7 days/week</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant opacity-30" data-icon="check_circle">check_circle</span>
+</div>
+<!-- Athlete -->
+<div class="clay-card bg-surface-container-lowest custom-radius p-5 flex items-center gap-5 cursor-pointer hover:bg-surface-container transition-colors group">
+<div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-4xl text-primary" data-icon="bolt">bolt</span>
+</div>
+<div class="flex-grow">
+<h3 class="font-headline font-bold text-lg text-on-surface">Athlete</h3>
+<p class="text-sm text-on-surface-variant leading-tight">Professional athlete or physical labor</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant opacity-30" data-icon="check_circle">check_circle</span>
+</div>
+</div>
+<!-- Decorative Element -->
+<div class="mt-12 opacity-40">
+<div class="h-px bg-gradient-to-r from-transparent via-outline-variant to-transparent"></div>
+</div>
+</main>
+<!-- Bottom Navigation (Primary Action) -->
+<div class="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-surface via-surface/90 to-transparent">
+<div class="max-w-xl mx-auto">
+<button class="clay-button w-full bg-gradient-to-br from-primary to-primary-container text-on-primary font-headline font-extrabold text-xl py-5 rounded-full flex items-center justify-center gap-3 active:scale-95 transition-all">
+                Next Step
+                <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</body></html>

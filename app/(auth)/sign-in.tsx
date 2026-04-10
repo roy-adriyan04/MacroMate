@@ -43,7 +43,7 @@ export default function SignInScreen() {
         password,
       });
       await setActive({ session: completeSignIn.createdSessionId });
-      router.replace("/(app)/home");
+      router.replace("/(app)");
     } catch (err: any) {
       alert(err.errors[0]?.message || "Login failed");
     } finally {
@@ -57,7 +57,7 @@ export default function SignInScreen() {
       
       if (createdSessionId) {
         await setActive!({ session: createdSessionId });
-        router.replace("/(app)/home");
+        router.replace("/(app)");
       }
     } catch (err) {
       console.error("OAuth error", err);
