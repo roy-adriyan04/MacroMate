@@ -1,19 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useUser } from '@clerk/clerk-expo';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors } from '../../constants/Colors';
 
 export default function PlanSummaryScreen() {
   const router = useRouter();
+  const { user } = useUser();
   const [aiPlan, setAiPlan] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadPlan = async () => {
       try {
-        const planJson = await AsyncStorage.getItem('onboarding_ai_plan');
+        if (!user) return;
+        const planJson = await AsyncStorage.getItem(`onboarding_ai_plan_${user.id}`);
         if (planJson) {
           setAiPlan(JSON.parse(planJson));
         } else {
@@ -33,8 +36,10 @@ export default function PlanSummaryScreen() {
         setIsLoading(false);
       }
     };
-    loadPlan();
-  }, []);
+    if (user) {
+      loadPlan();
+    }
+  }, [user]);
 
   if (isLoading) {
     return (

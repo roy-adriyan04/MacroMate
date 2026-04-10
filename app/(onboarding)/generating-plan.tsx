@@ -95,7 +95,7 @@ export default function GeneratingPlanScreen() {
       }
 
       // Pass the plan via AsyncStorage for local persistence if needed
-      await AsyncStorage.setItem('onboarding_ai_plan', JSON.stringify(aiPlan));
+      await AsyncStorage.setItem(`onboarding_ai_plan_${user.id}`, JSON.stringify(aiPlan));
       await AsyncStorage.setItem(`onboardingComplete_${user.id}`, 'true');
 
       // 5. Navigate to Summary
