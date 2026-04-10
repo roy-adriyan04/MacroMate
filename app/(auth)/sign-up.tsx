@@ -45,9 +45,15 @@ export default function SignUpScreen() {
     
     setLoading(true);
     try {
+      const nameParts = fullName.trim().split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
       await signUp.create({
         emailAddress,
         password,
+        firstName,
+        lastName,
       });
 
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
@@ -69,22 +75,6 @@ export default function SignUpScreen() {
 
       if (completeSignUp.status === "complete") {
         await setActive({ session: completeSignUp.createdSessionId });
-        
-        // Update user profile with full name if provided
-        if (fullName) {
-          try {
-            const nameParts = fullName.split(' ');
-            const firstName = nameParts[0];
-            const lastName = nameParts.slice(1).join(' ');
-            
-            // Note: We need the user object from the session or hook to update it.
-            // Since we're navigating to (app) right after, the AppLayout will 
-            // pick up the updated user object.
-          } catch (e) {
-            console.error("Failed to update name", e);
-          }
-        }
-        
         router.replace("/(app)/home");
       }
     } catch (err: any) {

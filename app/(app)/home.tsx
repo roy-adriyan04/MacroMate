@@ -4,11 +4,42 @@ import { Colors } from '../../constants/Colors';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { MaterialIcons } from '@expo/vector-icons';
 import Svg, { Circle, Path } from 'react-native-svg';
+import { getUserProfile } from '../../lib/firebase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Home() {
   const { signOut } = useAuth();
   const { user } = useUser();
   const [activeTab, setActiveTab] = useState('Feed');
+  const [aiPlan, setAiPlan] = useState<any>(null);
+
+  useEffect(() => {
+    async function loadPlan() {
+      if (!user) return;
+      try {
+        const profile = await getUserProfile(user.id);
+        if (profile?.aiPlan) {
+          setAiPlan(profile.aiPlan);
+        } else {
+          const cached = await AsyncStorage.getItem('onboarding_ai_plan');
+          if (cached) setAiPlan(JSON.parse(cached));
+        }
+      } catch (err) {
+        console.error("Home plan fetch error", err);
+      }
+    }
+    loadPlan();
+  }, [user]);
+
+  // Derived progress values (Mocked at 60% completion for UI preview)
+  const targetCals = aiPlan?.calories || 2100;
+  const currentCals = Math.floor(targetCals * 0.6);
+  const ringCircumference = 502; // 2 * pi * 80 radius
+  const completionRatio = Math.min(Math.max(currentCals / targetCals, 0), 1);
+  const ringOffset = ringCircumference - (ringCircumference * completionRatio);
+
+  const waterTarget = aiPlan?.waterCups || 10;
+  const currentWater = Math.floor(waterTarget * 0.5);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -17,15 +48,23 @@ export default function Home() {
       {/* Top AppBar */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <View style={styles.profilePicWrapper}>
-            <Image 
-              source={{ uri: user?.imageUrl || "https://img.clerk.com/eyJ0eXBlIjoiZGVmYXVsdCIsImlpZCI6Imluc18zQzA1emhwWnhNandKWGIzck9ja3pIanFaNGYiLCJyaWQiOiJ1c2VyXzNDMW9td01WcWFwOHBRTnJXbGlHYXBSbEtzNyIsImluaXRpYWxzIjoiQVIifQ" }} 
-              style={styles.profilePic} 
-            />
-          </View>
+          <TouchableOpacity style={styles.profilePicWrapper} onPress={() => signOut()}>
+            {user?.imageUrl ? (
+              <Image 
+                source={{ uri: user.imageUrl }} 
+                style={styles.profilePic} 
+              />
+            ) : (
+              <View style={[styles.profilePic, { backgroundColor: '#dde3e8', alignItems: 'center', justifyContent: 'center' }]}>
+                <Text style={{ fontSize: 18, fontWeight: '800', color: Colors.primary }}>
+                  {user?.firstName?.charAt(0) || user?.primaryEmailAddress?.emailAddress?.charAt(0)?.toUpperCase() || '?'}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
           <Text style={styles.appName}>MacroMate</Text>
         </View>
-        <TouchableOpacity style={styles.iconButton} onPress={() => signOut()}>
+        <TouchableOpacity style={styles.iconButton} onPress={() => console.log("Open Notifications")}>
           <MaterialIcons name="notifications" size={24} color={Colors.primary} />
         </TouchableOpacity>
       </View>
@@ -76,11 +115,11 @@ export default function Home() {
             <View style={styles.ringWrapper}>
               <Svg style={{ transform: [{ rotate: '-90deg' }] }} width="192" height="192" viewBox="0 0 192 192">
                 <Circle cx="96" cy="96" r="80" stroke="#dde3e8" strokeWidth="16" fill="transparent" />
-                <Circle cx="96" cy="96" r="80" stroke="#005ab2" strokeWidth="16" fill="transparent" strokeDasharray="502" strokeDashoffset="200" strokeLinecap="round" />
+                <Circle cx="96" cy="96" r="80" stroke="#005ab2" strokeWidth="16" fill="transparent" strokeDasharray={`${ringCircumference}`} strokeDashoffset={`${ringOffset}`} strokeLinecap="round" />
               </Svg>
               <View style={styles.ringTextContainer}>
-                <Text style={styles.ringCalories}>1,240</Text>
-                <Text style={styles.ringGoal}>/ 2,100 KCAL</Text>
+                <Text style={styles.ringCalories}>{currentCals.toLocaleString()}</Text>
+                <Text style={styles.ringGoal}>/ {targetCals.toLocaleString()} KCAL</Text>
               </View>
             </View>
 
@@ -88,21 +127,21 @@ export default function Home() {
             <View style={styles.macrosRow}>
               <View style={styles.macroCol}>
                 <View style={styles.macroTrack}>
-                  <View style={[styles.macroFill, { backgroundColor: Colors.tertiary, width: '75%' }]} />
+                  <View style={[styles.macroFill, { backgroundColor: Colors.tertiary, width: '60%' }]} />
                 </View>
-                <Text style={[styles.macroLabel, { color: Colors.tertiary }]}>PROTEIN</Text>
+                <Text style={[styles.macroLabel, { color: Colors.tertiary }]}>{aiPlan?.protein || 150}g PRO</Text>
               </View>
               <View style={styles.macroCol}>
                 <View style={styles.macroTrack}>
-                  <View style={[styles.macroFill, { backgroundColor: Colors.primaryContainer, width: '50%' }]} />
+                  <View style={[styles.macroFill, { backgroundColor: Colors.primaryContainer, width: '60%' }]} />
                 </View>
-                <Text style={[styles.macroLabel, { color: Colors.primary }]}>CARBS</Text>
+                <Text style={[styles.macroLabel, { color: Colors.primary }]}>{aiPlan?.carbs || 200}g CARB</Text>
               </View>
               <View style={styles.macroCol}>
                 <View style={styles.macroTrack}>
-                  <View style={[styles.macroFill, { backgroundColor: Colors.secondary, width: '33%' }]} />
+                  <View style={[styles.macroFill, { backgroundColor: Colors.secondary, width: '60%' }]} />
                 </View>
-                <Text style={[styles.macroLabel, { color: Colors.secondary }]}>FAT</Text>
+                <Text style={[styles.macroLabel, { color: Colors.secondary }]}>{aiPlan?.fat || 60}g FAT</Text>
               </View>
             </View>
 
@@ -115,7 +154,7 @@ export default function Home() {
             <MaterialIcons name="smart-toy" size={32} color={Colors.onPrimaryContainer} />
           </View>
           <View style={styles.coachTextCol}>
-            <Text style={styles.coachMessage}>You're 400 calories under — add a snack?</Text>
+            <Text style={styles.coachMessage}>{aiPlan?.coachMessage || "Let's hit today's targets!"}</Text>
             <TouchableOpacity>
               <Text style={styles.coachAction}>SHOW SUGGESTIONS</Text>
             </TouchableOpacity>
@@ -158,11 +197,11 @@ export default function Home() {
           <View style={[styles.clayCard, styles.gridCard, { justifyContent: 'space-between' }]}>
             <View>
               <Text style={styles.gridLabel}>WATER INTAKE</Text>
-              <Text style={styles.gridValue}>5/10 <Text style={styles.gridUnit}>cups</Text></Text>
+              <Text style={styles.gridValue}>{currentWater}/{waterTarget} <Text style={styles.gridUnit}>cups</Text></Text>
             </View>
             
             <View style={styles.waterDrops}>
-              {[1,2,3,4,5].map(i => (
+              {Array.from({ length: Math.min(currentWater, 5) }).map((_, i) => (
                 <View key={i} style={styles.waterDropActive}>
                   <MaterialIcons name="water-drop" size={20} color="#fff" />
                 </View>

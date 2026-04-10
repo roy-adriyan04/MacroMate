@@ -8,18 +8,35 @@ import { Colors } from '../../constants/Colors';
 export default function PlanSummaryScreen() {
   const router = useRouter();
   const [aiPlan, setAiPlan] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadPlan = async () => {
-      const planJson = await AsyncStorage.getItem('onboarding_ai_plan');
-      if (planJson) {
-        setAiPlan(JSON.parse(planJson));
+      try {
+        const planJson = await AsyncStorage.getItem('onboarding_ai_plan');
+        if (planJson) {
+          setAiPlan(JSON.parse(planJson));
+        } else {
+          throw new Error("No cached plan found");
+        }
+      } catch (e) {
+        console.warn("Failed to parse cached AI plan, providing fallback", e);
+        setAiPlan({
+          calories: 2100,
+          protein: 150,
+          carbs: 200,
+          fat: 60,
+          waterCups: 10,
+          coachMessage: "Let's hit today's targets!"
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
     loadPlan();
   }, []);
 
-  if (!aiPlan) {
+  if (isLoading) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
         <ActivityIndicator size="large" color={Colors.primary} />

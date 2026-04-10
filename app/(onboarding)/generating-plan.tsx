@@ -101,7 +101,7 @@ export default function GeneratingPlanScreen() {
       }
 
       // 4. Save to Firebase
-      await saveUserProfile(user.id, {
+      const dbSuccess = await saveUserProfile(user.id, {
         preferences: {
           onboardingComplete: true,
           goal,
@@ -115,6 +115,10 @@ export default function GeneratingPlanScreen() {
         }
       });
 
+      if (!dbSuccess) {
+        throw new Error("Firestore persistence failed");
+      }
+
       // Pass the plan via AsyncStorage for local persistence if needed
       await AsyncStorage.setItem('onboarding_ai_plan', JSON.stringify(aiPlan));
       await AsyncStorage.setItem('onboardingComplete', 'true');
@@ -124,9 +128,9 @@ export default function GeneratingPlanScreen() {
 
     } catch (err) {
       console.error("AI Generation Error: ", err);
-      // Even if AI fails, let's complete onboarding to avoid soft-lock.
-      await AsyncStorage.setItem('onboardingComplete', 'true');
-      router.replace('/(app)/home');
+      // We explicitly DO NOT set onboardingComplete to true if AI or DB fails.
+      // Route back so they can try again.
+      router.replace('/(onboarding)/buddy-invite');
     }
   };
 

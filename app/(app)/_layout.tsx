@@ -13,30 +13,47 @@ export default function AppLayout() {
 
   useEffect(() => {
     async function checkState() {
-      if (isSignedIn && user) {
-        // Save base info
-        await saveUserProfile(user.id, {
-          uid: user.id,
-          email: user.primaryEmailAddress?.emailAddress || "",
-          displayName: user.fullName || "User",
-          photoURL: user.imageUrl || null,
-          provider: user.externalAccounts.length > 0 ? "google" : "email"
-        });
+      try {
+        if (isSignedIn && user) {
+          // Save base info
+          await saveUserProfile(user.id, {
+            uid: user.id,
+            email: user.primaryEmailAddress?.emailAddress || "",
+            displayName: user.fullName || "User",
+            photoURL: user.imageUrl || null,
+            provider: user.externalAccounts.length > 0 ? "google" : "email"
+          });
 
-        const profile = await getUserProfile(user.id);
-        const isDbComplete = profile?.preferences?.onboardingComplete === true;
-        
-        if (isDbComplete) {
-          await AsyncStorage.setItem('onboardingComplete', 'true');
-          setNeedsOnboarding(false);
-        } else {
-          // The database clearly states onboarding is incomplete.
-          // Overwrite any stale local cache (like from a previous user's login).
-          await AsyncStorage.removeItem('onboardingComplete');
-          setNeedsOnboarding(true);
+          const profile = await getUserProfile(user.id);
+          const dbOnboardingState = profile?.preferences?.onboardingComplete;
+          
+          if (dbOnboardingState === true) {
+            await AsyncStorage.setItem('onboardingComplete', 'true');
+            setNeedsOnboarding(false);
+          } else if (dbOnboardingState === false) {
+            // The database explicitly states onboarding is incomplete.
+            // Overwrite any stale local cache (like from a previous user's login).
+            await AsyncStorage.multiRemove([
+              'onboardingComplete',
+              'onboarding_goal',
+              'onboarding_activity',
+              'onboarding_diet',
+              'onboarding_metrics',
+              'onboarding_ai_plan'
+            ]);
+            setNeedsOnboarding(true);
+          } else {
+            // Database request failed (null) or preference is undefined.
+            // Fall back to preserving local cached state.
+            const localComplete = await AsyncStorage.getItem('onboardingComplete');
+            setNeedsOnboarding(localComplete !== 'true');
+          }
         }
+      } catch (err) {
+        console.error("Layout checkState Error:", err);
+      } finally {
+        setChecking(false);
       }
-      setChecking(false);
     }
     
     if (isLoaded) {
