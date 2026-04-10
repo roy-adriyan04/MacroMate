@@ -88,8 +88,21 @@ export default function GeneratingPlanScreen() {
         }
       });
       
-      const result = await model.generateContent(prompt);
-      const responseText = result.response.text();
+      let responseText = "";
+      try {
+        const result = await model.generateContent(prompt);
+        responseText = result.response.text();
+      } catch (geminiErr: any) {
+        console.warn("Gemini API Error, falling back to offline mock plan:", geminiErr.message);
+        responseText = JSON.stringify({
+          calories: goal === 'Lose weight' ? 1800 : (goal === 'Gain muscle' ? 2800 : 2200),
+          protein: 160,
+          carbs: 220,
+          fat: 65,
+          waterCups: 12,
+          coachMessage: `Because your API key was revoked, I am supplying an offline fallback plan so you can continue building the app!`
+        });
+      }
       
       let aiPlan = null;
       try {

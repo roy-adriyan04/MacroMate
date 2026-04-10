@@ -114,7 +114,7 @@ export default function PlanSummaryScreen() {
 
       {/* Floating Bottom Action */}
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.primaryButton} onPress={() => router.replace('/(app)/home')}>
+        <TouchableOpacity style={styles.primaryButton} onPress={() => router.replace('/(app)')}>
           <Text style={styles.primaryButtonText}>Go to Home</Text>
           <MaterialIcons name="arrow-forward" size={20} color="#fff" />
         </TouchableOpacity>

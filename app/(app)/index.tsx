@@ -4,13 +4,14 @@ import { Colors } from '../../constants/Colors';
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { MaterialIcons } from '@expo/vector-icons';
 import Svg, { Circle, Path } from 'react-native-svg';
+import { BlurView } from 'expo-blur';
 import { getUserProfile } from '../../lib/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Home() {
   const { signOut } = useAuth();
   const { user } = useUser();
-  const [activeTab, setActiveTab] = useState('Feed');
+  const [activeTab, setActiveTab] = useState('Dashboard');
   const [aiPlan, setAiPlan] = useState<any>(null);
 
   useEffect(() => {
@@ -255,30 +256,32 @@ export default function Home() {
 
       {/* Floating Action Button */}
       <TouchableOpacity style={[styles.clayCard, styles.fab]}>
-        <MaterialIcons name="add" size={32} color="#fff" />
+        <MaterialIcons name="smart-toy" size={32} color="#fff" />
       </TouchableOpacity>
 
-      {/* Fixed Bottom NavBar (Visual Mockup) */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('Feed')}>
-          <MaterialIcons name="dynamic-feed" size={24} color={activeTab === 'Feed' ? Colors.primary : Colors.onSurfaceVariant} />
-          <Text style={[styles.navText, activeTab === 'Feed' && styles.navTextActive]}>Feed</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={[styles.navItemCenter, styles.clayInset]} onPress={() => setActiveTab('Nutrition')}>
-          <MaterialIcons name="restaurant" size={28} color="#fff" />
-          <Text style={styles.navTextCenter}>Nutrition</Text>
-        </TouchableOpacity>
+      {/* Floating Glass Bottom NavBar */}
+      <View style={styles.bottomNavContainer}>
+        <BlurView intensity={80} tint="light" style={styles.bottomNav}>
+          <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('Dashboard')}>
+            <MaterialIcons name="home" size={24} color={activeTab === 'Dashboard' ? Colors.primary : Colors.onSurfaceVariant} />
+            <Text style={[styles.navText, activeTab === 'Dashboard' && styles.navTextActive]}>Dashboard</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('Nutrition')}>
+            <MaterialIcons name="restaurant" size={24} color={activeTab === 'Nutrition' ? Colors.primary : Colors.onSurfaceVariant} />
+            <Text style={[styles.navText, activeTab === 'Nutrition' && styles.navTextActive]}>Nutrition</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('Workouts')}>
-          <MaterialIcons name="fitness-center" size={24} color={activeTab === 'Workouts' ? Colors.primary : Colors.onSurfaceVariant} />
-          <Text style={[styles.navText, activeTab === 'Workouts' && styles.navTextActive]}>Workouts</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('Coach')}>
-          <MaterialIcons name="smart-toy" size={24} color={activeTab === 'Coach' ? Colors.primary : Colors.onSurfaceVariant} />
-          <Text style={[styles.navText, activeTab === 'Coach' && styles.navTextActive]}>Coach</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('Workouts')}>
+            <MaterialIcons name="fitness-center" size={24} color={activeTab === 'Workouts' ? Colors.primary : Colors.onSurfaceVariant} />
+            <Text style={[styles.navText, activeTab === 'Workouts' && styles.navTextActive]}>Workouts</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab('Feed')}>
+            <MaterialIcons name="dynamic-feed" size={24} color={activeTab === 'Feed' ? Colors.primary : Colors.onSurfaceVariant} />
+            <Text style={[styles.navText, activeTab === 'Feed' && styles.navTextActive]}>Feed</Text>
+          </TouchableOpacity>
+        </BlurView>
       </View>
 
     </SafeAreaView>
@@ -727,27 +730,29 @@ const styles = StyleSheet.create({
   },
 
   // Bottom Nav Setup
-  bottomNav: {
+  bottomNavContainer: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    bottom: Platform.OS === 'ios' ? 32 : 24,
+    left: 24,
+    right: 24,
+    borderRadius: 40,
+    shadowColor: '#2a2f32',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  bottomNav: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingBottom: Platform.OS === 'ios' ? 32 : 24,
-    paddingTop: 16,
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
-    shadowColor: '#2a2f32',
-    shadowOffset: { width: 0, height: -10 },
-    shadowOpacity: 0.05,
-    shadowRadius: 20,
-    elevation: 10,
-    borderTopWidth: 1,
-    borderColor: 'rgba(255,255,255,0.5)',
+    paddingVertical: 16,
+    backgroundColor: 'rgba(255,255,255,0.65)',
+    borderRadius: 40,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.8)',
+    overflow: 'hidden',
   },
   navItem: {
     alignItems: 'center',
