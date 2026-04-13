@@ -2,23 +2,50 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, Platform, StatusBar, Dimensions } from 'react-native';
 import { Colors } from '../../constants/Colors';
 import { useAuth, useUser } from '@clerk/clerk-expo';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { BlurView } from 'expo-blur';
 import { getUserProfile } from '../../lib/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import WorkoutHub from '../../components/WorkoutHub';
+import { useWorkout } from '../../context/WorkoutContext';
 
 export default function Home() {
   const { signOut } = useAuth();
   const { user } = useUser();
-  const [activeTab, setActiveTab] = useState('Dashboard');
+  const router = useRouter();
+  const params = useLocalSearchParams();
+  const [activeTab, setActiveTab] = useState(params.tab ? (params.tab as string) : 'Dashboard');
+  const { isWorkoutActive, elapsedSeconds, formatTime, userUnit } = useWorkout();
+
+  useEffect(() => {
+    if (params.tab) {
+      setActiveTab(params.tab as string);
+    }
+  }, [params.tab]);
+  
   const [aiPlan, setAiPlan] = useState<any>(null);
+  const [userWeight, setUserWeight] = useState<string>('185.4');
 
   useEffect(() => {
     async function loadPlan() {
       if (!user) return;
       try {
         const profile = await getUserProfile(user.id);
+        
+        let prefs = profile?.preferences;
+        if (!prefs) {
+          const cachedJson = await AsyncStorage.getItem('onboarding_metrics');
+          if (cachedJson) prefs = { metrics: JSON.parse(cachedJson) };
+        }
+        
+        if (prefs?.metrics) {
+          if (prefs.metrics.weight) {
+            setUserWeight(prefs.metrics.weight);
+          }
+        }
+
         if (profile?.aiPlan) {
           setAiPlan(profile.aiPlan);
         } else {
@@ -74,7 +101,8 @@ export default function Home() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        
+        {activeTab === 'Dashboard' ? (
+          <>
         {/* Date Carousel */}
         <View style={styles.dateCarousel}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dateList}>
@@ -186,11 +214,11 @@ export default function Home() {
               <View style={styles.gridHeaderRow}>
                 <View>
                   <Text style={styles.gridLabel}>CURRENT WEIGHT</Text>
-                  <Text style={styles.gridValue}>185.4 <Text style={styles.gridUnit}>lbs</Text></Text>
+                  <Text style={styles.gridValue}>{userWeight} <Text style={styles.gridUnit}>{userUnit}</Text></Text>
                 </View>
                 <View style={styles.gridBadge}>
                   <MaterialIcons name="trending-down" size={14} color={Colors.tertiary} />
-                  <Text style={styles.gridBadgeText}>-1.2 lbs</Text>
+                  <Text style={styles.gridBadgeText}>-1.2 {userUnit}</Text>
                 </View>
               </View>
               
@@ -273,7 +301,7 @@ export default function Home() {
             />
             <View style={styles.feedContent}>
               <Text style={styles.feedText}><Text style={styles.feedName}>Sarah</Text> hit a PR!</Text>
-              <Text style={styles.feedDetail}>DEADLIFT • 225 LBS</Text>
+              <Text style={styles.feedDetail}>DEADLIFT • 225 {userUnit.toUpperCase()}</Text>
             </View>
             <TouchableOpacity>
               <MaterialIcons name="favorite" size={24} color={Colors.secondary} />
@@ -293,6 +321,10 @@ export default function Home() {
             </TouchableOpacity>
           </View>
         </View>
+        </>
+        ) : activeTab === 'Workouts' ? (
+          <WorkoutHub />
+        ) : null}
         
       </ScrollView>
 
@@ -300,6 +332,18 @@ export default function Home() {
       <TouchableOpacity style={[styles.clayCard, styles.fab]}>
         <MaterialIcons name="smart-toy" size={32} color="#fff" />
       </TouchableOpacity>
+
+      {/* Floating Workout Timer (Global Access) */}
+      {isWorkoutActive && (
+        <TouchableOpacity 
+           style={[styles.clayCard, styles.globalTimerFab]} 
+           onPress={() => router.push('/(app)/active-workout')}
+           activeOpacity={0.9}
+        >
+          <View style={styles.globalTimerDot} />
+          <Text style={styles.globalTimerText}>{formatTime(elapsedSeconds)}</Text>
+        </TouchableOpacity>
+      )}
 
       {/* Floating Glass Bottom NavBar */}
       <View style={styles.bottomNavContainer}>
@@ -785,6 +829,40 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 20,
     zIndex: 40,
+  },
+  globalTimerFab: {
+    position: 'absolute',
+    bottom: 110,
+    left: 24,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 32,
+    backgroundColor: '#ffffff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    shadowColor: '#2a2f32',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 5,
+    zIndex: 40,
+  },
+  globalTimerDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: Colors.tertiary,
+    shadowColor: Colors.tertiary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 6,
+  },
+  globalTimerText: {
+    fontSize: 14,
+    fontFamily: 'Plus Jakarta Sans',
+    fontWeight: '800',
+    color: '#2a2f32',
   },
 
   // Bottom Nav Setup
