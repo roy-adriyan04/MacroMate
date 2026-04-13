@@ -28,24 +28,24 @@ export default function AppLayout() {
           const dbOnboardingState = profile?.preferences?.onboardingComplete;
           
           if (dbOnboardingState === true) {
-            await AsyncStorage.setItem('onboardingComplete', 'true');
+            await AsyncStorage.setItem(`onboardingComplete_${user.id}`, 'true');
             setNeedsOnboarding(false);
           } else if (dbOnboardingState === false) {
             // The database explicitly states onboarding is incomplete.
             // Overwrite any stale local cache (like from a previous user's login).
             await AsyncStorage.multiRemove([
-              'onboardingComplete',
+              `onboardingComplete_${user.id}`,
               'onboarding_goal',
               'onboarding_activity',
               'onboarding_diet',
               'onboarding_metrics',
-              'onboarding_ai_plan'
+              `onboarding_ai_plan_${user.id}`
             ]);
             setNeedsOnboarding(true);
           } else {
             // Database request failed (null) or preference is undefined.
             // Fall back to preserving local cached state.
-            const localComplete = await AsyncStorage.getItem('onboardingComplete');
+            const localComplete = await AsyncStorage.getItem(`onboardingComplete_${user.id}`);
             setNeedsOnboarding(localComplete !== 'true');
           }
         }

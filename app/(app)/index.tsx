@@ -1,28 +1,55 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, Platform, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, Platform, StatusBar, Dimensions } from 'react-native';
 import { Colors } from '../../constants/Colors';
 import { useAuth, useUser } from '@clerk/clerk-expo';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { BlurView } from 'expo-blur';
 import { getUserProfile } from '../../lib/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import WorkoutHub from '../../components/WorkoutHub';
+import { useWorkout } from '../../context/WorkoutContext';
 
 export default function Home() {
   const { signOut } = useAuth();
   const { user } = useUser();
-  const [activeTab, setActiveTab] = useState('Dashboard');
+  const router = useRouter();
+  const params = useLocalSearchParams();
+  const [activeTab, setActiveTab] = useState(params.tab ? (params.tab as string) : 'Dashboard');
+  const { isWorkoutActive, elapsedSeconds, formatTime, userUnit } = useWorkout();
+
+  useEffect(() => {
+    if (params.tab) {
+      setActiveTab(params.tab as string);
+    }
+  }, [params.tab]);
+  
   const [aiPlan, setAiPlan] = useState<any>(null);
+  const [userWeight, setUserWeight] = useState<string>('185.4');
 
   useEffect(() => {
     async function loadPlan() {
       if (!user) return;
       try {
         const profile = await getUserProfile(user.id);
+        
+        let prefs = profile?.preferences;
+        if (!prefs) {
+          const cachedJson = await AsyncStorage.getItem('onboarding_metrics');
+          if (cachedJson) prefs = { metrics: JSON.parse(cachedJson) };
+        }
+        
+        if (prefs?.metrics) {
+          if (prefs.metrics.weight) {
+            setUserWeight(prefs.metrics.weight);
+          }
+        }
+
         if (profile?.aiPlan) {
           setAiPlan(profile.aiPlan);
         } else {
-          const cached = await AsyncStorage.getItem('onboarding_ai_plan');
+          const cached = await AsyncStorage.getItem(`onboarding_ai_plan_${user.id}`);
           if (cached) setAiPlan(JSON.parse(cached));
         }
       } catch (err) {
@@ -41,6 +68,9 @@ export default function Home() {
 
   const waterTarget = aiPlan?.waterCups || 10;
   const currentWater = Math.floor(waterTarget * 0.5);
+
+  const { width } = Dimensions.get('window');
+  const cardWidth = width - 48; // Full width minus 24px padding on both sides
 
   return (
     <SafeAreaView style={styles.container}>
@@ -71,7 +101,8 @@ export default function Home() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        
+        {activeTab === 'Dashboard' ? (
+          <>
         {/* Date Carousel */}
         <View style={styles.dateCarousel}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dateList}>
@@ -130,19 +161,28 @@ export default function Home() {
                 <View style={styles.macroTrack}>
                   <View style={[styles.macroFill, { backgroundColor: Colors.tertiary, width: '60%' }]} />
                 </View>
-                <Text style={[styles.macroLabel, { color: Colors.tertiary }]}>{aiPlan?.protein || 150}g PRO</Text>
+                <View style={styles.macroLabelRow}>
+                  <MaterialIcons name="egg-alt" size={14} color={Colors.tertiary} />
+                  <Text style={[styles.macroLabel, { color: Colors.tertiary }]}>{aiPlan?.protein || 150}g Protein</Text>
+                </View>
               </View>
               <View style={styles.macroCol}>
                 <View style={styles.macroTrack}>
                   <View style={[styles.macroFill, { backgroundColor: Colors.primaryContainer, width: '60%' }]} />
                 </View>
-                <Text style={[styles.macroLabel, { color: Colors.primary }]}>{aiPlan?.carbs || 200}g CARB</Text>
+                <View style={styles.macroLabelRow}>
+                  <MaterialIcons name="breakfast-dining" size={14} color={Colors.primary} />
+                  <Text style={[styles.macroLabel, { color: Colors.primary }]}>{aiPlan?.carbs || 200}g Carbs</Text>
+                </View>
               </View>
               <View style={styles.macroCol}>
                 <View style={styles.macroTrack}>
                   <View style={[styles.macroFill, { backgroundColor: Colors.secondary, width: '60%' }]} />
                 </View>
-                <Text style={[styles.macroLabel, { color: Colors.secondary }]}>{aiPlan?.fat || 60}g FAT</Text>
+                <View style={styles.macroLabelRow}>
+                  <MaterialIcons name="water-drop" size={14} color={Colors.secondary} />
+                  <Text style={[styles.macroLabel, { color: Colors.secondary }]}>{aiPlan?.fat || 60}g Fats</Text>
+                </View>
               </View>
             </View>
 
@@ -165,36 +205,67 @@ export default function Home() {
           </TouchableOpacity>
         </View>
 
-        {/* Weight & Water Grid */}
-        <View style={styles.gridRow}>
-          
-          {/* Weight Card */}
-          <View style={[styles.clayCard, styles.gridCard]}>
-            <View style={styles.gridHeaderRow}>
-              <View>
-                <Text style={styles.gridLabel}>CURRENT WEIGHT</Text>
-                <Text style={styles.gridValue}>185.4 <Text style={styles.gridUnit}>lbs</Text></Text>
-              </View>
-              <View style={styles.gridBadge}>
-                <MaterialIcons name="trending-down" size={14} color={Colors.tertiary} />
-                <Text style={styles.gridBadgeText}>-1.2 lbs</Text>
-              </View>
-            </View>
+        {/* Weight & Steps Scrollable Row */}
+        <View style={styles.scrollRowWrapper}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollRow} snapToInterval={cardWidth + 16} decelerationRate="fast">
             
-            <View style={styles.sparklineContainer}>
-              <Svg style={{ width: '100%', height: 64, overflow: 'visible' }} viewBox="0 0 100 40" preserveAspectRatio="none">
-                <Path d="M 0,10 Q 15,12 25,18 T 50,25 T 75,32 T 100,38" fill="none" stroke="#64a1ff" strokeWidth="3" strokeLinecap="round" />
-                <Circle cx="0" cy="10" r="3" fill="#64a1ff" />
-                <Circle cx="100" cy="38" r="4" fill="#005ab2" />
-              </Svg>
+            {/* Weight Card */}
+            <View style={[styles.clayCard, styles.gridCard, { width: cardWidth }]}>
+              <View style={styles.gridHeaderRow}>
+                <View>
+                  <Text style={styles.gridLabel}>CURRENT WEIGHT</Text>
+                  <Text style={styles.gridValue}>{userWeight} <Text style={styles.gridUnit}>{userUnit}</Text></Text>
+                </View>
+                <View style={styles.gridBadge}>
+                  <MaterialIcons name="trending-down" size={14} color={Colors.tertiary} />
+                  <Text style={styles.gridBadgeText}>-1.2 {userUnit}</Text>
+                </View>
+              </View>
+              
+              <View style={styles.sparklineContainer}>
+                <Svg style={{ width: '100%', height: 64, overflow: 'visible' }} viewBox="0 0 100 40" preserveAspectRatio="none">
+                  <Path d="M 0,10 Q 15,12 25,18 T 50,25 T 75,32 T 100,38" fill="none" stroke="#64a1ff" strokeWidth="3" strokeLinecap="round" />
+                  <Circle cx="0" cy="10" r="3" fill="#64a1ff" />
+                  <Circle cx="100" cy="38" r="4" fill="#005ab2" />
+                </Svg>
+              </View>
+
+              <TouchableOpacity style={styles.logButton}>
+                <Text style={styles.logButtonText}>LOG WEIGHT</Text>
+              </TouchableOpacity>
             </View>
 
-            <TouchableOpacity style={styles.logButton}>
-              <Text style={styles.logButtonText}>LOG WEIGHT</Text>
-            </TouchableOpacity>
-          </View>
+            {/* Steps Card */}
+            <View style={[styles.clayCard, styles.gridCard, { width: cardWidth }]}>
+              <View style={styles.gridHeaderRow}>
+                <View>
+                  <Text style={styles.gridLabel}>DAILY STEPS</Text>
+                  <Text style={styles.gridValue}>8,420 <Text style={styles.gridUnit}>steps</Text></Text>
+                </View>
+                <View style={[styles.gridBadge, { backgroundColor: 'rgba(0, 90, 178, 0.1)' }]}>
+                  <MaterialIcons name="directions-walk" size={14} color={Colors.primary} />
+                  <Text style={[styles.gridBadgeText, { color: Colors.primary }]}>+1,200</Text>
+                </View>
+              </View>
+              
+              <View style={styles.sparklineContainer}>
+                <Svg style={{ width: '100%', height: 64, overflow: 'visible' }} viewBox="0 0 100 40" preserveAspectRatio="none">
+                  <Path d="M 0,38 Q 20,38 40,25 T 80,15 T 100,5" fill="none" stroke={Colors.primary} strokeWidth="3" strokeLinecap="round" />
+                  <Circle cx="0" cy="38" r="3" fill="#64a1ff" />
+                  <Circle cx="100" cy="5" r="4" fill="#005ab2" />
+                </Svg>
+              </View>
 
-          {/* Water Tracker */}
+              <TouchableOpacity style={styles.logButton}>
+                <Text style={styles.logButtonText}>LOG STEPS</Text>
+              </TouchableOpacity>
+            </View>
+
+          </ScrollView>
+        </View>
+
+        {/* Water Tracker (Full Width Row) */}
+        <View style={styles.singleRow}>
           <View style={[styles.clayCard, styles.gridCard, { justifyContent: 'space-between' }]}>
             <View>
               <Text style={styles.gridLabel}>WATER INTAKE</Text>
@@ -202,7 +273,7 @@ export default function Home() {
             </View>
             
             <View style={styles.waterDrops}>
-              {Array.from({ length: Math.min(currentWater, 5) }).map((_, i) => (
+              {Array.from({ length: Math.min(currentWater, 12) }).map((_, i) => (
                 <View key={i} style={styles.waterDropActive}>
                   <MaterialIcons name="water-drop" size={20} color="#fff" />
                 </View>
@@ -212,7 +283,6 @@ export default function Home() {
               </TouchableOpacity>
             </View>
           </View>
-
         </View>
 
         {/* Buddy Feed Preview */}
@@ -231,7 +301,7 @@ export default function Home() {
             />
             <View style={styles.feedContent}>
               <Text style={styles.feedText}><Text style={styles.feedName}>Sarah</Text> hit a PR!</Text>
-              <Text style={styles.feedDetail}>DEADLIFT • 225 LBS</Text>
+              <Text style={styles.feedDetail}>DEADLIFT • 225 {userUnit.toUpperCase()}</Text>
             </View>
             <TouchableOpacity>
               <MaterialIcons name="favorite" size={24} color={Colors.secondary} />
@@ -251,6 +321,10 @@ export default function Home() {
             </TouchableOpacity>
           </View>
         </View>
+        </>
+        ) : activeTab === 'Workouts' ? (
+          <WorkoutHub />
+        ) : null}
         
       </ScrollView>
 
@@ -258,6 +332,18 @@ export default function Home() {
       <TouchableOpacity style={[styles.clayCard, styles.fab]}>
         <MaterialIcons name="smart-toy" size={32} color="#fff" />
       </TouchableOpacity>
+
+      {/* Floating Workout Timer (Global Access) */}
+      {isWorkoutActive && (
+        <TouchableOpacity 
+           style={[styles.clayCard, styles.globalTimerFab]} 
+           onPress={() => router.push('/(app)/active-workout')}
+           activeOpacity={0.9}
+        >
+          <View style={styles.globalTimerDot} />
+          <Text style={styles.globalTimerText}>{formatTime(elapsedSeconds)}</Text>
+        </TouchableOpacity>
+      )}
 
       {/* Floating Glass Bottom NavBar */}
       <View style={styles.bottomNavContainer}>
@@ -528,6 +614,12 @@ const styles = StyleSheet.create({
     height: '100%',
     borderRadius: 4,
   },
+  macroLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 4,
+  },
   macroLabel: {
     fontSize: 10,
     fontWeight: '900',
@@ -571,7 +663,17 @@ const styles = StyleSheet.create({
     padding: 4,
   },
 
-  // Grid
+  // Grid & Scrollable Tracking Rows
+  scrollRowWrapper: {
+    marginHorizontal: -24, // Pull text to edges for scrolling
+  },
+  scrollRow: {
+    paddingHorizontal: 24,
+    gap: 16,
+  },
+  singleRow: {
+    width: '100%',
+  },
   gridRow: {
     flexDirection: 'row',
     gap: 24,
@@ -727,6 +829,40 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 20,
     zIndex: 40,
+  },
+  globalTimerFab: {
+    position: 'absolute',
+    bottom: 110,
+    left: 24,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 32,
+    backgroundColor: '#ffffff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    shadowColor: '#2a2f32',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 5,
+    zIndex: 40,
+  },
+  globalTimerDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: Colors.tertiary,
+    shadowColor: Colors.tertiary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 6,
+  },
+  globalTimerText: {
+    fontSize: 14,
+    fontFamily: 'Plus Jakarta Sans',
+    fontWeight: '800',
+    color: '#2a2f32',
   },
 
   // Bottom Nav Setup

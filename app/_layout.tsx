@@ -5,6 +5,8 @@ import Constants from "expo-constants";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
+import { WorkoutProvider } from '../context/WorkoutContext';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -21,8 +23,6 @@ export default function RootLayout() {
   const [loaded, error] = useFonts({
     "PlusJakartaSans-Bold": "https://github.com/google/fonts/raw/main/ofl/plusjakartasans/PlusJakartaSans-Bold.ttf",
     "BeVietnamPro-Regular": "https://github.com/google/fonts/raw/main/ofl/bevietnampro/BeVietnamPro-Regular.ttf",
-    // We can just rely on standard system fonts if remote ones are tricky to download all variants safely.
-    // For now we'll stick to basic RN fonts for speed, let's keep it simple.
   });
 
   useEffect(() => {
@@ -36,10 +36,14 @@ export default function RootLayout() {
   }
 
   return (
-    <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
-      <ClerkLoaded>
-        <Slot />
-      </ClerkLoaded>
-    </ClerkProvider>
+    <SafeAreaProvider>
+      <ClerkProvider tokenCache={tokenCache} publishableKey={publishableKey}>
+        <ClerkLoaded>
+          <WorkoutProvider>
+            <Slot />
+          </WorkoutProvider>
+        </ClerkLoaded>
+      </ClerkProvider>
+    </SafeAreaProvider>
   );
 }

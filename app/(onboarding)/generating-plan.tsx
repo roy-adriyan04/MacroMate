@@ -4,10 +4,6 @@ import { useRouter } from 'expo-router';
 import { useUser } from '@clerk/clerk-expo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { saveUserProfile } from '../../lib/firebase';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-// Initialize Gemini 
-const genAI = new GoogleGenerativeAI(process.env.EXPO_PUBLIC_GEMINI_API_KEY || '');
 
 export default function GeneratingPlanScreen() {
   const router = useRouter();
@@ -60,58 +56,24 @@ export default function GeneratingPlanScreen() {
       const metricsJson = await AsyncStorage.getItem('onboarding_metrics');
       let metrics = metricsJson ? JSON.parse(metricsJson) : null;
 
-      // 2. Format a prompt for Gemini
-      const prompt = `
-        You are a world-class fitness coach and nutritionist. 
-        Calculate the precise daily caloric needs, macronutrient targets (Protein, Carbs, Fats), and daily water intake required for a person with the following profile:
-        - Goal: ${goal}
-        - Activity Level: ${activityLevel}
-        - Preferred Diet: ${dietType}
-        - Metrics: ${metricsJson}
-
-        Return strictly valid JSON corresponding to this format:
-        {
-          "calories": (integer),
-          "protein": (integer),
-          "carbs": (integer),
-          "fat": (integer),
-          "waterCups": (integer, minimum 8),
-          "coachMessage": (a short encouraging 1-sentence message based on their goal)
-        }
-      `;
-
-      // 3. Request generation (Using gemini-3-flash-preview exactly as requested)
-      const model = genAI.getGenerativeModel({ 
-        model: "gemini-3-flash-preview", 
-        generationConfig: {
-          responseMimeType: "application/json"
-        }
+      // 2. Fetch AI Plan directly from our secure backend!
+      // This protects the API key and handles rate-limits securely off-client.
+      const response = await fetch('/api/generate-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          goal,
+          activityLevel,
+          dietType,
+          metricsJson
+        })
       });
-      
-      let responseText = "";
-      try {
-        const result = await model.generateContent(prompt);
-        responseText = result.response.text();
-      } catch (geminiErr: any) {
-        console.warn("Gemini API Error, falling back to offline mock plan:", geminiErr.message);
-        responseText = JSON.stringify({
-          calories: goal === 'Lose weight' ? 1800 : (goal === 'Gain muscle' ? 2800 : 2200),
-          protein: 160,
-          carbs: 220,
-          fat: 65,
-          waterCups: 12,
-          coachMessage: `Because your API key was revoked, I am supplying an offline fallback plan so you can continue building the app!`
-        });
+
+      if (!response.ok) {
+        throw new Error('Backend failed to generate plan');
       }
-      
-      let aiPlan = null;
-      try {
-        aiPlan = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error("Failed to parse Gemini response as JSON", responseText);
-        // Fallback placeholder structure just in case the model failed schema constraints
-        aiPlan = { calories: 2000, protein: 150, carbs: 200, fat: 60, waterCups: 10, coachMessage: "Let's hit your goals!" };
-      }
+
+      const aiPlan = await response.json();
 
       // 4. Save to Firebase
       const dbSuccess = await saveUserProfile(user.id, {
@@ -133,8 +95,8 @@ export default function GeneratingPlanScreen() {
       }
 
       // Pass the plan via AsyncStorage for local persistence if needed
-      await AsyncStorage.setItem('onboarding_ai_plan', JSON.stringify(aiPlan));
-      await AsyncStorage.setItem('onboardingComplete', 'true');
+      await AsyncStorage.setItem(`onboarding_ai_plan_${user.id}`, JSON.stringify(aiPlan));
+      await AsyncStorage.setItem(`onboardingComplete_${user.id}`, 'true');
 
       // 5. Navigate to Summary
       router.replace('/(onboarding)/plan-summary' as any);
